@@ -84,11 +84,13 @@ const getSide = (i: number): any => {
 };
 
 // These two are just helpers, they curate spring data, values that are later being interpolated into css
-const to = (i: number) => ({
-	...getSide(i),
-	scale: 1,
-	delay: (52 - i) * 100
-});
+const to = (i: number) => [
+	{
+		...getSide(i),
+		scale: 1,
+		delay: (52 - i) * 100
+	}
+];
 const from = (_i: number) => ({ x: 0, rot: 0, scale: 0.8, y: 0 });
 // This is being used down there in the view, it interpolates rotation and scale into a css transform
 const trans = (r: number, s: number) =>
