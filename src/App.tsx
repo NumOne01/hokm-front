@@ -3,17 +3,46 @@ import { useSprings, animated, to as interpolate } from '@react-spring/web';
 import { useDrag } from 'react-use-gesture';
 
 import styles from './styles.module.css';
+import { Card } from './models/Card';
+import { Khal } from './models/Khal';
 
 const cards: string[] = [];
+
+
+const availableCards: Card[] = [];
 
 const KHALS = ['pike', 'heart', 'clover', 'tile'];
 
 const pictures = ['king', 'queen', 'soldier']
 
+for(const khal of Object.values(Khal)) {
+	for(let i = 1; i < 14; i++) {
+		availableCards.push(
+			{khal, num: i}
+		);
+	}
+}
+
+function generateUserCards(): Card[] {
+	const cards: Card[] = [];
+
+	let card: Card, randomIndex: number;
+
+	for(let i = 0; i < 13; i++) {
+		randomIndex = Math.random() * (availableCards.length - 1);
+		card = availableCards.splice(randomIndex, 1)[0];
+		cards.push(card);
+	}
+
+	return cards;
+}
+
+const userCards = generateUserCards();
+
 for(const khal of KHALS) {
 	for(let i = 1; i < 11; i++) {
 		cards.push(
-			`/assets/cards/${khal}_${i}.svg`
+			`/assets/cards/back_card.svg`
 		);
 	}
 	
@@ -97,6 +126,7 @@ const trans = (r: number, s: number) =>
 
 function Deck() {
 	const [gone, setGone] = useState(() => new Set()); // The set flags all the cards that are flicked out
+	const [userCards, setUserCards] = useState(generateUserCards())
 	const [props, api] = useSprings(cards.length, i => ({
 		to: to(i),
 		from: from(i)
@@ -125,6 +155,8 @@ function Deck() {
 		}
 	, { initial: (comm) => [props[comm.args].x.get(), props[comm.args].y.get()], bounds: comm => !gone.has(props[comm.args]) && ({ left: props[comm.args].x.get(), right: props[comm.args].x.get() -200, top: props[comm.args].y.get() - 60, bottom: props[comm.args].y.get() + 20 })});
 
+	console.log(availableCards, userCards)
+
 	return (
 		<>
 			{props.map(({ x, y, rot, scale }, i) => (
@@ -132,9 +164,10 @@ function Deck() {
 					{/* This is the card itself, we're binding our gesture to it (and inject its index so we know which is which) */}
 					<animated.div
 						{...bind(i)}
+						id="shit"
 						style={{
 							transform: interpolate([rot, scale], trans),
-							backgroundImage: `url(${cards[i]})`
+							backgroundImage: userCards.includes(availableCards[i]) ? `url(/assets/card/${availableCards[i].khal}_${availableCards[i].num}.svg)` : 'url(/assets/cards/back_card.svg)'
 						}}
 					/>
 				</animated.div>
